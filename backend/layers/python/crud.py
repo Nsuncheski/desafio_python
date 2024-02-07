@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from database.model import Person, Vehicle, Officer, Infringement
 
@@ -7,7 +8,7 @@ class CRUD:
         self.db = db
         self.model = model
 
-    def create(self, dict1: dict,):
+    def create(self, dict1: dict):
 
         instance = self.model(dict1)
         self.db.add(instance)
@@ -55,3 +56,20 @@ class OfficerCRUD(CRUD):
 class InfringementCRUD(CRUD):
     def __init__(self, db: Session):
         super().__init__(db, Infringement)
+
+    def create(self, dict1: dict):
+            # Verificar si existe un vehículo con la misma placa en la base de datos
+        
+        vehicle = self.db.query(Vehicle).filter(Vehicle.license_plate == dict1['placa_patente']).first()
+        if not vehicle:
+            raise HTTPException(status_code=404, detail="La placa ingresada no existe en la base de datos de vehículos.")
+        
+        # Si el vehículo existe, continuar con la lógica de tu aplicación
+        # Aquí puedes crear la infracción o realizar cualquier otra acción necesaria
+        # Por ejemplo:
+        instance = self.model(dict1)
+        self.db.add(instance)
+
+        self.db.commit()
+        self.db.refresh(instance)
+        return instance

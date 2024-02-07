@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from crud import VehicleCRUD, OfficerCRUD, PersonCRUD, InfringementCRUD
-from database.model import SessionLocal, engine, Vehicle, Officer, Person, Infringement
-from fastapi import FastAPI, HTTPException, Depends, Header
+from database.model import SessionLocal, engine, Vehicle, Officer, Person
+from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
@@ -13,7 +13,7 @@ from model_pydantic_multas import (
     PersonPydantic,
     InfraccionCreate,
 )
-import jwt
+
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -56,7 +56,6 @@ def get_infringement_crud(db: Session = Depends(get_db)) -> InfringementCRUD:
 def create_person(
     person: PersonPydantic, person_crud: PersonCRUD = Depends(get_person_crud)
 ):
-
 
     return person_crud.create(person.dict())
 
@@ -102,7 +101,6 @@ def create_officer(
     oficce: OfficerPydantic, oficce_crud: OfficerCRUD = Depends(get_office_crud)
 ):
 
-
     return oficce_crud.create(oficce.dict())
 
 
@@ -142,7 +140,6 @@ def create_vehicles(
     vehicles: VehiclePydantic, vehicles_crud: VehicleCRUD = Depends(get_vehicles_crud)
 ):
 
-
     return vehicles_crud.create(vehicles.dict())
 
 
@@ -169,14 +166,26 @@ def update_vehicles(
 
 
 # Ruta para cargar una infracción
+@app.exception_handler(RequestValidationError)
 @app.post("/cargar_infraccion/")
 def cargar_infraccion(
     infraccion: InfraccionCreate,
     infringement_crud: VehicleCRUD = Depends(get_infringement_crud),
 ):
-    # Verificar si el vehículo existe
-
-    return infringement_crud.create(infraccion.dict())
+    try:
+        # Verificar si el vehículo existe
+        print("la exception no es por pydantic##################")
+        return infringement_crud.create(infraccion.dict())
+    except HTTPException as e:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "No se encontro patente"},
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Ha habido un error de validación con los datos enviados"},
+        )
 
 
 @app.get("/generar_informe/")

@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://fastapi:8000"
 
 
 # Función para cargar una infracción

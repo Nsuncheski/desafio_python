@@ -35,6 +35,6 @@ class Officer(OfficerPydantic):
         orm_mode = True
         
 class InfraccionCreate(BaseModel):
-    placa_patente: str
-    timestamp: str
-    comentarios: str
+        placa_patente: str
+        timestamp: str
+        comentarios: str
