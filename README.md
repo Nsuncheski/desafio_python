@@ -4,7 +4,7 @@
 **Para ejecutar el docker compose use los siguientes comandos**:
 
    ```bash
-   docker compose build
+   docker compose build´´´
 docker compose up
 
 **para utilizar las APIs que cargan la multa y piden los informes entre por el siguiente link**:
